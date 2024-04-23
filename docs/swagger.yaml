@@ -8,42 +8,6 @@ definitions:
     required:
     - regNums
     type: object
-  controllers.carDto:
-    properties:
-      amount:
-        description: Amount of cars per page
-        type: integer
-      mark:
-        description: Car mark (optional)
-        type: string
-      model:
-        description: Car model (optional)
-        type: string
-      owner:
-        allOf:
-        - $ref: '#/definitions/controllers.ownerDto'
-        description: Car owner filters (optional)
-      page:
-        description: Page number
-        type: integer
-      regNum:
-        description: Car registration number (optional)
-        type: string
-      year:
-        description: Car year (optional)
-        type: integer
-    type: object
-  controllers.ownerDto:
-    properties:
-      name:
-        type: string
-      patronymic:
-        description: Car owner patronymic
-        type: string
-      surname:
-        description: Car owner surname
-        type: string
-    type: object
   controllers.updateCarDto:
     properties:
       mark:
@@ -142,16 +106,41 @@ paths:
       tags:
       - cars
   /get:
-    post:
-      consumes:
-      - application/json
-      description: Retrieve cars based on various filters
+    get:
+      description: Retrieve cars based on optional filters
       parameters:
-      - description: Car filter parameters
-        in: body
-        name: req
-        schema:
-          $ref: '#/definitions/controllers.carDto'
+      - description: Page number. Sets to 1 if not specified
+        in: query
+        name: page
+        type: integer
+      - description: Amount of cars per page. Sets to 10 if not specified
+        in: query
+        name: amount
+        type: integer
+      - description: Optional car's regNum filter
+        in: query
+        name: regNum
+        type: string
+      - description: Optional car's mark filter
+        in: query
+        name: mark
+        type: string
+      - description: Optional car's year filter
+        in: query
+        name: year
+        type: integer
+      - description: Optional owner's name filter
+        in: query
+        name: name
+        type: string
+      - description: Optional owner's surname filter
+        in: query
+        name: surname
+        type: string
+      - description: Optional owner's patronymic filter
+        in: query
+        name: patronymic
+        type: string
       produces:
       - application/json
       responses:

@@ -97,11 +97,8 @@ const docTemplate = `{
             }
         },
         "/get": {
-            "post": {
-                "description": "Retrieve cars based on various filters",
-                "consumes": [
-                    "application/json"
-                ],
+            "get": {
+                "description": "Retrieve cars based on optional filters",
                 "produces": [
                     "application/json"
                 ],
@@ -111,12 +108,52 @@ const docTemplate = `{
                 "summary": "Get cars",
                 "parameters": [
                     {
-                        "description": "Car filter parameters",
-                        "name": "req",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/controllers.carDto"
-                        }
+                        "type": "integer",
+                        "description": "Page number. Sets to 1 if not specified",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Amount of cars per page. Sets to 10 if not specified",
+                        "name": "amount",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional car's regNum filter",
+                        "name": "regNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional car's mark filter",
+                        "name": "mark",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Optional car's year filter",
+                        "name": "year",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional owner's name filter",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional owner's surname filter",
+                        "name": "surname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Optional owner's patronymic filter",
+                        "name": "patronymic",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -200,59 +237,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "controllers.carDto": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "description": "Amount of cars per page",
-                    "type": "integer"
-                },
-                "mark": {
-                    "description": "Car mark (optional)",
-                    "type": "string"
-                },
-                "model": {
-                    "description": "Car model (optional)",
-                    "type": "string"
-                },
-                "owner": {
-                    "description": "Car owner filters (optional)",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/controllers.ownerDto"
-                        }
-                    ]
-                },
-                "page": {
-                    "description": "Page number",
-                    "type": "integer"
-                },
-                "regNum": {
-                    "description": "Car registration number (optional)",
-                    "type": "string"
-                },
-                "year": {
-                    "description": "Car year (optional)",
-                    "type": "integer"
-                }
-            }
-        },
-        "controllers.ownerDto": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "patronymic": {
-                    "description": "Car owner patronymic",
-                    "type": "string"
-                },
-                "surname": {
-                    "description": "Car owner surname",
-                    "type": "string"
                 }
             }
         },

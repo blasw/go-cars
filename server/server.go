@@ -23,7 +23,7 @@ func New(db *storage.Storage, logger *zap.Logger) *Server {
 }
 
 func (s *Server) setupRoutes() {
-	s.Engine.POST("/get", controllers.GetCars(s.DB, s.Logger))
+	s.Engine.GET("/get", controllers.GetCars(s.DB, s.Logger))
 	s.Engine.DELETE("/delete", controllers.DeleteCarByRegNum(s.DB, s.Logger))
 	s.Engine.PATCH("/update", controllers.UpdateCarByRegNum(s.DB, s.Logger))
 	s.Engine.POST("/add", controllers.AddCars(s.DB, s.Logger))

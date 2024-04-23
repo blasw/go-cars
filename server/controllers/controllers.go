@@ -14,53 +14,38 @@ import (
 	"go.uber.org/zap"
 )
 
-type ownerDto struct {
-	Name string `json:"name"`
-
-	// Car owner surname
-	Surname string `json:"surname"`
-
-	// Car owner patronymic
-	Patronymic string `json:"patronymic"`
-}
-
-type carDto struct {
-	// Page number
-	Page int `json:"page"`
-
-	// Amount of cars per page
-	Amount int `json:"amount"`
-
-	// Car registration number (optional)
-	RegNum string `json:"regNum"`
-
-	// Car mark (optional)
-	Mark string `json:"mark"`
-
-	// Car model (optional)
-	Model string `json:"model"`
-
-	// Car year (optional)
-	Year int `json:"year"`
-
-	// Car owner filters (optional)
-	Owner ownerDto `json:"owner"`
+type getCarsDto struct {
+	Page            int    `form:"page"`
+	Amount          int    `form:"amount"`
+	RegNum          string `form:"regNum"`
+	Mark            string `form:"mark"`
+	Model           string `form:"model"`
+	Year            int    `form:"year"`
+	OwnerName       string `form:"name"`
+	OwnerSurname    string `form:"surname"`
+	OwnerPatronymic string `form:"patronymic"`
 }
 
 // @Summary		Get cars
-// @Description	Retrieve cars based on various filters
+// @Description	Retrieve cars based on optional filters
 // @Tags			cars
-// @Accept			json
 // @Produce		json
-// @Param			req	body		carDto	false	"Car filter parameters"
-// @Success		200	{array}		models.Cars
-// @Failure		400	{object}	map[string]string
-// @Failure		500	{object}	map[string]string
-// @Router			/get [post]
+// @Param			page		query		int		false	"Page number. Sets to 1 if not specified"
+// @Param			amount		query		int		false	"Amount of cars per page. Sets to 10 if not specified"
+// @Param			regNum		query		string	false	"Optional car's regNum filter"
+// @Param			mark		query		string	false	"Optional car's mark filter"
+// @Param			year		query		int		false	"Optional car's year filter"
+// @Param			name		query		string	false	"Optional owner's name filter"
+// @Param			surname		query		string	false	"Optional owner's surname filter"
+// @Param			patronymic	query		string	false	"Optional owner's patronymic filter"
+// @Success		200			{array}		models.Cars
+// @Failure		400			{object}	map[string]string
+// @Failure		500			{object}	map[string]string
+// @Router			/get [get]
 func GetCars(db *storage.Storage, logger *zap.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var dto carDto
-		if err := ctx.ShouldBindJSON(&dto); err != nil {
+		var dto getCarsDto
+		if err := ctx.ShouldBindQuery(&dto); err != nil {
 			logger.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -80,9 +65,9 @@ func GetCars(db *storage.Storage, logger *zap.Logger) gin.HandlerFunc {
 			Mark:            dto.Mark,
 			Model:           dto.Model,
 			Year:            dto.Year,
-			OwnerName:       dto.Owner.Name,
-			OwnerSurname:    dto.Owner.Surname,
-			OwnerPatronymic: dto.Owner.Patronymic,
+			OwnerName:       dto.OwnerName,
+			OwnerSurname:    dto.OwnerSurname,
+			OwnerPatronymic: dto.OwnerPatronymic,
 		}
 
 		offset := (dto.Page - 1) * dto.Amount
@@ -102,7 +87,19 @@ type addCarsDto struct {
 	RegNums []string `json:"regNums" binding:"required"`
 }
 
-func getCarFromSourceServer(regNum string) (*carDto, error) {
+type sourceServerResponse struct {
+	RegNum string `json:"regNum"`
+	Mark   string `json:"mark"`
+	Model  string `json:"model"`
+	Year   int    `json:"year"`
+	Owner  struct {
+		Name       string `json:"name"`
+		Surname    string `json:"surname"`
+		Patronymic string `json:"patronymic"`
+	} `json:"owner"`
+}
+
+func getCarFromSourceServer(regNum string) (*sourceServerResponse, error) {
 	resp, err := http.Get(os.Getenv("SRC_ADDR") + "/info?regNum=" + regNum)
 	if err != nil {
 		return nil, err
@@ -110,7 +107,7 @@ func getCarFromSourceServer(regNum string) (*carDto, error) {
 
 	defer resp.Body.Close()
 
-	var car carDto
+	var car sourceServerResponse
 
 	jsonBytes, _ := io.ReadAll(resp.Body)
 
@@ -142,7 +139,7 @@ func AddCars(db *storage.Storage, logger *zap.Logger) gin.HandlerFunc {
 		}
 
 		var errors []string
-		var cars []*carDto
+		var cars []*sourceServerResponse
 
 		for _, regNum := range dto.RegNums {
 			car, err := getCarFromSourceServer(regNum)
