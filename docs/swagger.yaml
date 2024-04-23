@@ -1,0 +1,203 @@
+definitions:
+  controllers.addCarsDto:
+    properties:
+      regNums:
+        items:
+          type: string
+        type: array
+    required:
+    - regNums
+    type: object
+  controllers.carDto:
+    properties:
+      amount:
+        description: Amount of cars per page
+        type: integer
+      mark:
+        description: Car mark (optional)
+        type: string
+      model:
+        description: Car model (optional)
+        type: string
+      owner:
+        allOf:
+        - $ref: '#/definitions/controllers.ownerDto'
+        description: Car owner filters (optional)
+      page:
+        description: Page number
+        type: integer
+      regNum:
+        description: Car registration number (optional)
+        type: string
+      year:
+        description: Car year (optional)
+        type: integer
+    type: object
+  controllers.ownerDto:
+    properties:
+      name:
+        type: string
+      patronymic:
+        description: Car owner patronymic
+        type: string
+      surname:
+        description: Car owner surname
+        type: string
+    type: object
+  controllers.updateCarDto:
+    properties:
+      mark:
+        type: string
+      model:
+        type: string
+      regNum:
+        type: string
+      year:
+        type: integer
+    required:
+    - regNum
+    type: object
+  models.Cars:
+    properties:
+      id:
+        type: integer
+      mark:
+        type: string
+      model:
+        type: string
+      owner:
+        $ref: '#/definitions/models.Owners'
+      ownerID:
+        type: integer
+      regNum:
+        type: string
+      year:
+        type: integer
+    type: object
+  models.Owners:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /add:
+    post:
+      consumes:
+      - application/json
+      description: Adds cars from source server by regNums
+      parameters:
+      - description: Cars' regNums
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.addCarsDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add cars
+      tags:
+      - cars
+  /delete:
+    delete:
+      description: Deletes car selected by regNum
+      parameters:
+      - description: Car's regNum
+        in: query
+        name: regNum
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete car
+      tags:
+      - cars
+  /get:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve cars based on various filters
+      parameters:
+      - description: Car filter parameters
+        in: body
+        name: req
+        schema:
+          $ref: '#/definitions/controllers.carDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Cars'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get cars
+      tags:
+      - cars
+  /update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates provided fields of car selected by regNum
+      parameters:
+      - description: Updated information
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.updateCarDto'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update car
+      tags:
+      - cars
+swagger: "2.0"
